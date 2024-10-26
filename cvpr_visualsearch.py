@@ -4,7 +4,9 @@ import scipy.io as sio
 import cv2
 from random import randint
 from cvpr_compare import cvpr_compare
+from utils import visualization
 import ipdb
+import matplotlib.pyplot as plt
 
 DESCRIPTOR_FOLDER = 'descriptors'
 DESCRIPTOR_SUBFOLDER = 'globalRGBhisto'
@@ -27,25 +29,21 @@ ALLFEAT = np.array(ALLFEAT)
 
 # Pick a random image as the query
 NIMG = ALLFEAT.shape[0]
-queryimg = randint(0, NIMG - 1)
+queryimg_index = randint(0, NIMG - 1)
 
 # Compute the distance between the query and all other descriptors
 dst = []
-query = ALLFEAT[queryimg]
+queryimg = ALLFEAT[queryimg_index]
 for i in range(NIMG):
     candidate = ALLFEAT[i]
-    distance = cvpr_compare(query, candidate)
+    distance = cvpr_compare(queryimg, candidate)
     dst.append((distance, i))
 
 # Sort the distances
 dst.sort(key=lambda x: x[0])
 
-# Show the top 15 results
 SHOW = 15
-for i in range(SHOW):
-    img = cv2.imread(ALLFILES[dst[i][1]])
-    img = cv2.resize(img, (img.shape[1] // 2, img.shape[0] // 2))  # Make image quarter size
-    cv2.imshow(f"Result {i+1}", img)
-    cv2.waitKey(0)
+visualization(ALLFILES, queryimg_index, dst, SHOW)
+
 cv2.destroyAllWindows()
 
