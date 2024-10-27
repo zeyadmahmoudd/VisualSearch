@@ -1,31 +1,18 @@
-import os
-import numpy as np
-import scipy.io as sio
 import cv2
 from random import randint
 from cvpr_compare import cvpr_compare
 from utils import visualization
 import ipdb
 import matplotlib.pyplot as plt
+from dataset import load_dataset, labelling
+from evaluation import precision_and_recall, plotPRcurve, confusionMatrix
 
 DESCRIPTOR_FOLDER = 'descriptors'
 DESCRIPTOR_SUBFOLDER = 'globalRGBhisto'
 IMAGE_FOLDER = 'MSRC_ObjCategImageDatabase_v2'
 
-# Load all descriptors
-ALLFEAT = []
-ALLFILES = []
-for filename in os.listdir(os.path.join(DESCRIPTOR_FOLDER, DESCRIPTOR_SUBFOLDER)):
-    if filename.endswith('.mat'):
-        img_path = os.path.join(DESCRIPTOR_FOLDER, DESCRIPTOR_SUBFOLDER, filename)
-        img_actual_path = os.path.join(IMAGE_FOLDER,'Images',filename).replace(".mat",".bmp")
-        # ipdb.set_trace()
-        img_data = sio.loadmat(img_path)
-        ALLFILES.append(img_actual_path)
-        ALLFEAT.append(img_data['F'][0])  # Assuming F is a 1D array
-
-# Convert ALLFEAT to a numpy array
-ALLFEAT = np.array(ALLFEAT)
+ALLFEAT, ALLFILES = load_dataset(DESCRIPTOR_FOLDER, DESCRIPTOR_SUBFOLDER, IMAGE_FOLDER)
+labels = labelling(ALLFILES)
 
 # Pick a random image as the query
 NIMG = ALLFEAT.shape[0]
@@ -43,7 +30,12 @@ for i in range(NIMG):
 dst.sort(key=lambda x: x[0])
 
 SHOW = 15
-visualization(ALLFILES, queryimg_index, dst, SHOW)
+
+precision, recall, labels_by_rank = precision_and_recall(ALLFILES, queryimg_index, dst, labels)
+
+visualization(ALLFILES, queryimg_index, dst, SHOW, precision, recall)
+plotPRcurve(precision, recall, SHOW)
+confusionMatrix(ALLFILES, queryimg_index, dst, SHOW, labels_by_rank)
 
 cv2.destroyAllWindows()
 
