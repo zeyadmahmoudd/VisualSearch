@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import cv2
+import numpy as np
 
 def visualization(ALLFILES, queryimg_index, dst, SHOW, precision, recall):
 
@@ -28,3 +29,38 @@ def visualization(ALLFILES, queryimg_index, dst, SHOW, precision, recall):
     plt.tight_layout()  
     plt.subplots_adjust(wspace=0, hspace=0)
     plt.show()
+
+
+def create_grid(img, grid_size):
+    
+    #converting image into numpy array
+    img = np.asarray(img)
+
+
+    #Getting the height and width of the image
+    h, w = img.shape[:2]
+
+    #getting the height and width of every cell in the grid
+    cell_h = h//grid_size
+    cell_w = w//grid_size
+
+    #constructing grid cells
+    grid_cells = []
+
+    for i in range(grid_size):
+        for j in range(grid_size):
+            
+            y_start = i * cell_h
+            y_end = (i + 1) * cell_h if i < grid_size - 1 else h
+            x_start = j * cell_w
+            x_end = (j + 1) * cell_w if j < grid_size - 1 else w
+            
+            # Extract cell
+            cell = img[y_start:y_end, x_start:x_end]
+            
+            # Resize cell to ensure uniform dimensions
+            cell = cv2.resize(cell, (cell_w, cell_h))
+            
+            grid_cells.append(cell)
+
+    return np.array(grid_cells)
