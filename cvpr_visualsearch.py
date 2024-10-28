@@ -8,7 +8,7 @@ from dataset import load_dataset, labelling
 from evaluation import precision_and_recall, plotPRcurve, confusionMatrix
 
 DESCRIPTOR_FOLDER = 'descriptors'
-DESCRIPTOR_SUBFOLDER = 'globalRGBhisto'
+DESCRIPTOR_SUBFOLDER = 'GridCellsRGB_HSV_LAB'
 IMAGE_FOLDER = 'MSRC_ObjCategImageDatabase_v2'
 
 ALLFEAT, ALLFILES = load_dataset(DESCRIPTOR_FOLDER, DESCRIPTOR_SUBFOLDER, IMAGE_FOLDER)
