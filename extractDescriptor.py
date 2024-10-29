@@ -2,6 +2,8 @@
 import numpy as np
 import cv2
 from utils import create_grid
+from skimage.feature import local_binary_pattern
+
 
 def extractRandom(img):
     # Generate a random row vector with 30 elements
@@ -64,6 +66,14 @@ def color_moments(img):
     moments.extend([mean, std, skewness])
 
     return np.array(moments)
+
+def lbp():
+    # Basic usage
+    lbp = local_binary_pattern(gray_image, n_points=8, radius=1, method='uniform')
+
+    # Get histogram of patterns
+    n_bins = 8 + 2  # For uniform LBP with 8 points
+    histogram, _ = np.histogram(lbp, bins=n_bins, range=(0, n_bins), density=True)
 
 def process_grid_cells(img, grid_size, bins=(8, 8, 8), RGB = True, HSV = False, LAB = False, moments = False):
 
