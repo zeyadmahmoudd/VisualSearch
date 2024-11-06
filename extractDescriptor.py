@@ -2,7 +2,7 @@
 import numpy as np
 import cv2
 from utils import create_grid
-from skimage.feature import local_binary_pattern
+from skimage.feature import local_binary_pattern, graycomatrix, graycoprops, hog
 
 
 def extractRandom(img):
@@ -33,7 +33,7 @@ def globalColorDescriptor(img):
 
     return F
 
-def globalColorHistogram(img, color_space, bins=(8, 8, 8)):
+def globalColorHistogram(img, color_space = 'RGB', bins=(8, 8, 8)):
 
     img = (img* 255).astype(np.uint8)
 
@@ -50,7 +50,7 @@ def globalColorHistogram(img, color_space, bins=(8, 8, 8)):
         hist = cv2.calcHist([lab_img], [0,1,2], None, bins, 
                            [0,256,0,256,0,256])
         
-    hist = cv2.normalize(hist, None).flatten()
+    hist = cv2.normalize(hist, None, norm_type=cv2.NORM_L1).flatten()
     return hist
 
 def color_moments(img):
@@ -65,15 +65,63 @@ def color_moments(img):
 
     moments.extend([mean, std, skewness])
 
-    return np.array(moments)
+    mean = np.mean(moments)
+    std = np.std(moments)
+    
+    return (moments - mean) / (std + 1e-7)
 
-def lbp():
-    # Basic usage
+def lbp(img):
+    
+    img = (img * 255).astype(np.uint8)
+
+    gray_image = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+
     lbp = local_binary_pattern(gray_image, n_points=8, radius=1, method='uniform')
 
-    # Get histogram of patterns
     n_bins = 8 + 2  # For uniform LBP with 8 points
     histogram, _ = np.histogram(lbp, bins=n_bins, range=(0, n_bins), density=True)
+    histogram = histogram / (np.sum(histogram) + 1e-7)
+    
+
+    return histogram
+
+def glcm(img, distances = [50], angles = [np.pi/2]): #Distance offset to look at and angles is the directions to look at pi/2 means vertical only
+
+    img = (img * 255).astype(np.uint8)
+
+    img = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+    
+    glcm = graycomatrix(img, 
+                    distances=distances, 
+                    angles=angles,
+                    levels=256)
+    
+    properties = ['contrast', 'dissimilarity', 'homogeneity', 'energy', 'correlation', 'ASM']
+
+    feature_vector = []
+
+    for prop in properties:
+        feature = graycoprops(glcm, prop).ravel() 
+        feature_vector.extend(feature)
+
+    feature_vector = np.array(feature_vector)
+
+    return feature_vector
+
+def HOG(img, orientations=9, pixels_per_cell=8, cells_per_block=2):
+
+    img = (img * 255).astype(np.uint8)
+
+    img = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+
+    hog_features = hog(img, 
+                    orientations=orientations, 
+                    pixels_per_cell=(pixels_per_cell, pixels_per_cell), 
+                    cells_per_block=(cells_per_block, cells_per_block),
+                    transform_sqrt=True)
+    hog_features = hog_features / np.linalg.norm(hog_features)
+    
+    return hog_features
 
 def process_grid_cells(img, grid_size, bins=(8, 8, 8), RGB = True, HSV = False, LAB = False, moments = False):
 
