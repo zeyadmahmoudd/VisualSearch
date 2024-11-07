@@ -31,7 +31,9 @@ def globalColorDescriptor(img):
 
     F=np.array([average_red,  average_green,  average_blue])
 
-    return F
+    F_normalized = (F - np.mean(F)) / (np.std(F) + 1e-7)
+
+    return F_normalized
 
 def globalColorHistogram(img, color_space = 'RGB', bins=(8, 8, 8)):
 
@@ -143,6 +145,7 @@ def process_grid_cells(img, grid_size, bins=(8, 8, 8), RGB = True, HSV = False, 
             all_features.append(features)
 
     final_features = np.concatenate(all_features)
+    
     return final_features
 
 
