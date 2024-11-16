@@ -7,7 +7,7 @@ import joblib
 
 
 OUT_FOLDER = 'descriptors'
-OUT_SUBFOLDER = 'hog'
+OUT_SUBFOLDER = 'sift'
 DESCRIPTOR_FOLDER = os.path.join(OUT_FOLDER, OUT_SUBFOLDER)  
 
 def apply_pca_to_descriptors(descriptor_folder, n_components=100):
