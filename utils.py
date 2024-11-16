@@ -1,6 +1,8 @@
 import matplotlib.pyplot as plt
 import cv2
 import numpy as np
+from scipy.linalg import inv
+
 
 def visualization(ALLFILES, queryimg_index, dst, SHOW, precision, recall):
 
@@ -64,3 +66,17 @@ def create_grid(img, grid_size):
             grid_cells.append(cell)
 
     return np.array(grid_cells)
+
+
+def inv_conv(all_descriptors):
+
+    # Compute covariance matrix
+    covariance = np.cov(all_descriptors, rowvar=False)
+    
+    # Add small regularization to avoid singular matrix
+    covariance += np.eye(covariance.shape[0]) * 1e-6
+    
+    # Compute inverse covariance
+    inv_covariance = inv(covariance)
+
+    return inv_covariance
